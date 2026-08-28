@@ -1,1 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
 
+  <meta name="theme-color" content="#050505" />
+  <meta name="color-scheme" content="dark" />
+  <meta
+    name="description"
+    content="Something is coming."
+  />
+
+  <title>Coming Soon</title>
+
+  <style>
+    /* =========================================================
+       RESET
+    ========================================================= */
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    html {
+      background: #050505;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      min-height: 100svh;
+      overflow: hidden;
+      background:
+        radial-gradient(
+          circle at 50% 45%,
+          rgba(255, 255, 255, 0.055) 0%,
+          rgba(255, 255, 255, 0.018) 25%,
+          transparent 58%
+        ),
+        #050505;
+      color: #ffffff;
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* =========================================================
+       BACKGROUND
+    ========================================================= */
+
+    .background {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .noise {
+      position: absolute;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      opacity: 0.035;
+
+      background-image:
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+
+      animation: noiseMove 0.25s steps(2) infinite;
+    }
+
+    @keyframes noiseMove {
+      0%   { transform: translate(0, 0); }
+      25%  { transform: translate(1%, -1%); }
+      50%  { transform: translate(-1%, 1%); }
+      75%  { transform: translate(1%, 1%); }
+      100% { transform: translate(-1%, -1%); }
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+
+      background:
+        radial-gradient(
+          ellipse at center,
+          transparent 30%,
+          rgba(0, 0, 0, 0.25) 62%,
+          rgba(0, 0, 0, 0.85) 100%
+        );
+    }
+
+    .orb {
+      position: absolute;
+      width: min(55vw, 700px);
+      aspect-ratio: 1;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.025);
+      filter: blur(80px);
+
+      animation: breathe 7s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%,
+      100% {
+        opacity: 0.35;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+
+      50% {
+        opacity: 0.75;
+        transform: translate(-50%, -50%) scale(1.08);
+      }
+    }
+
+    /* =========================================================
+       PARTICLES
+    ========================================================= */
+
+    #particles {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* =========================================================
+       MAIN
+    ========================================================= */
+
+    main {
+      position: relative;
+      z-index: 2;
+
+      width: 100%;
+      min-height: 100svh;
+
+      display: grid;
+      place-items: center;
+
+      padding:
+        max(24px, env(safe-area-inset-top))
+        max(24px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom))
+        max(24px, env(safe-area-inset-left));
+    }
+
+    .content {
+      width: min(100%, 1000px);
+      text-align: center;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      animation: entrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes entrance {
+      from {
+        opacity: 0;
+        transform: translateY(25px) scale(0.98);
+        filter: blur(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    /* =========================================================
+       SMALL LABEL
+    ========================================================= */
+
+    .label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      margin-bottom: clamp(18px, 3vw, 28px);
+
+      color: rgba(255, 255, 255, 0.55);
+
+      font-size: clamp(10px, 1.1vw, 13px);
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+    }
+
+    .label::before,
+    .label::after {
+      content: "";
+      width: clamp(18px, 4vw, 42px);
+      height: 1px;
+
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.35)
+      );
+    }
+
+    .label::after {
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.35),
+        transparent
+      );
+    }
+
+    /* =========================================================
+       MAIN TITLE
+    ========================================================= */
+
+    h1 {
+      position: relative;
+
+      font-size: clamp(3.2rem, 10.5vw, 9.5rem);
+      line-height: 0.86;
+
+      font-weight: 800;
+      letter-spacing: -0.075em;
+
+      color: #ffffff;
+
+      text-wrap: balance;
+
+      text-shadow:
+        0 0 30px rgba(255, 255, 255, 0.06),
+        0 0 80px rgba(255, 255, 255, 0.035);
+    }
+
+    h1 span {
+      display: block;
+
+      background:
+        linear-gradient(
+          180deg,
+          #ffffff 0%,
+          #eeeeee 48%,
+          #8e8e8e 100%
+        );
+
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    h1::after {
+      content: "";
+      position: absolute;
+
+      left: 50%;
+      bottom: -18px;
+
+      width: min(120px, 20vw);
+      height: 2px;
+
+      transform: translateX(-50%);
+
+      background: rgba(255, 255, 255, 0.55);
+
+      box-shadow:
+        0 0 12px rgba(255, 255, 255, 0.35),
+        0 0 30px rgba(255, 255, 255, 0.12);
+
+      animation: linePulse 3s ease-in-out infinite;
+    }
+
+    @keyframes linePulse {
+      0%,
+      100% {
+        opacity: 0.4;
+        transform: translateX(-50%) scaleX(0.8);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translateX(-50%) scaleX(1);
+      }
+    }
+
+    /* =========================================================
+       SUBTEXT
+    ========================================================= */
+
+    .subtext {
+      margin-top: clamp(42px, 6vw, 58px);
+
+      color: rgba(255, 255, 255, 0.45);
+
+      font-size: clamp(11px, 1.4vw, 15px);
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+
+      animation: subtleFloat 5s ease-in-out infinite;
+    }
+
+    @keyframes subtleFloat {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-3px);
+      }
+    }
+
+    /* =========================================================
+       PROGRESS
+    ========================================================= */
+
+    .progress {
+      width: min(280px, 65vw);
+
+      margin-top: clamp(24px, 4vw, 34px);
+
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 2px;
+
+      overflow: hidden;
+
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+
+      background: #ffffff;
+      border-radius: inherit;
+
+      box-shadow:
+        0 0 10px rgba(255, 255, 255, 0.7),
+        0 0 25px rgba(255, 255, 255, 0.25);
+
+      animation: load 3.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes load {
+      from {
+        width: 0%;
+      }
+
+      to {
+        width: 73%;
+      }
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+
+      color: rgba(255, 255, 255, 0.25);
+
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    /* =========================================================
+       CORNER DETAILS
+    ========================================================= */
+
+    .corner {
+      position: fixed;
+      z-index: 3;
+
+      width: 28px;
+      height: 28px;
+
+      opacity: 0.25;
+    }
+
+    .corner::before,
+    .corner::after {
+      content: "";
+      position: absolute;
+      background: #ffffff;
+    }
+
+    .corner::before {
+      width: 100%;
+      height: 1px;
+    }
+
+    .corner::after {
+      width: 1px;
+      height: 100%;
+    }
+
+    .corner.top-left {
+      top: 28px;
+      left: 28px;
+    }
+
+    .corner.top-right {
+      top: 28px;
+      right: 28px;
+      transform: rotate(90deg);
+    }
+
+    .corner.bottom-right {
+      right: 28px;
+      bottom: 28px;
+      transform: rotate(180deg);
+    }
+
+    .corner.bottom-left {
+      bottom: 28px;
+      left: 28px;
+      transform: rotate(270deg);
+    }
+
+    /* =========================================================
+       FOOTER
+    ========================================================= */
+
+    footer {
+      position: fixed;
+      z-index: 3;
+
+      left: 50%;
+      bottom: max(22px, env(safe-area-inset-bottom));
+
+      transform: translateX(-50%);
+
+      color: rgba(255, 255, 255, 0.2);
+
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+
+      white-space: nowrap;
+    }
+
+    /* =========================================================
+       MOBILE
+    ========================================================= */
+
+    @media (max-width: 600px) {
+      .noise {
+        opacity: 0.025;
+      }
+
+      .orb {
+        width: 100vw;
+        filter: blur(65px);
+      }
+
+      .label {
+        letter-spacing: 0.2em;
+      }
+
+      h1 {
+        font-size: clamp(3.4rem, 17vw, 6rem);
+        letter-spacing: -0.07em;
+      }
+
+      .subtext {
+        letter-spacing: 0.11em;
+      }
+
+      .corner {
+        width: 20px;
+        height: 20px;
+      }
+
+      .corner.top-left,
+      .corner.top-right {
+        top: 18px;
+      }
+
+      .corner.top-left,
+      .corner.bottom-left {
+        left: 18px;
+      }
+
+      .corner.top-right,
+      .corner.bottom-right {
+        right: 18px;
+      }
+
+      .corner.bottom-left,
+      .corner.bottom-right {
+        bottom: 18px;
+      }
+
+      footer {
+        font-size: 7px;
+        letter-spacing: 0.15em;
+      }
+    }
+
+    /* =========================================================
+       VERY SMALL DEVICES
+    ========================================================= */
+
+    @media (max-height: 500px) {
+      .label {
+        margin-bottom: 12px;
+      }
+
+      h1 {
+        font-size: clamp(2.8rem, 13vw, 5rem);
+      }
+
+      .subtext {
+        margin-top: 32px;
+      }
+
+      .progress {
+        margin-top: 18px;
+      }
+
+      footer {
+        display: none;
+      }
+    }
+
+    /* =========================================================
+       REDUCED MOTION
+    ========================================================= */
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Background -->
+  <div class="background" aria-hidden="true">
+    <canvas id="particles"></canvas>
+    <div class="orb"></div>
+    <div class="noise"></div>
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Decorative corners -->
+  <div class="corner top-left" aria-hidden="true"></div>
+  <div class="corner top-right" aria-hidden="true"></div>
+  <div class="corner bottom-right" aria-hidden="true"></div>
+  <div class="corner bottom-left" aria-hidden="true"></div>
+
+  <!-- Main -->
+  <main>
+    <section class="content" aria-label="Coming soon">
+
+      <div class="label">
+        Something is coming
+      </div>
+
+      <h1>
+        <span>COMING</span>
+        <span>SOON</span>
+      </h1>
+
+      <div class="subtext">
+        Stay tuned
+      </div>
+
+      <div class="progress" aria-hidden="true">
+        <div class="progress-track">
+          <div class="progress-bar"></div>
+        </div>
+
+        <div class="progress-meta">
+          <span>Preparing</span>
+          <span>73%</span>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    Something worth waiting for
+  </footer>
+
+  <script>
+    /* =========================================================
+       PARTICLE SYSTEM
+       Lightweight canvas animation
+    ========================================================= */
+
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+
+    let width = 0;
+    let height = 0;
+    let particles = [];
+
+    const prefersReducedMotion =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function resizeCanvas() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      width = window.innerWidth;
+      height = window.innerHeight;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      createParticles();
+    }
+
+    function createParticles() {
+      const area = width * height;
+
+      const count = Math.min(
+        90,
+        Math.max(25, Math.floor(area / 18000))
+      );
+
+      particles = [];
+
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+
+          radius: Math.random() * 1.2 + 0.2,
+
+          speedX: (Math.random() - 0.5) * 0.12,
+          speedY: (Math.random() - 0.5) * 0.12,
+
+          opacity: Math.random() * 0.4 + 0.05,
+
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.01 + 0.003
+        });
+      }
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, width, height);
+
+      for (const particle of particles) {
+        if (!prefersReducedMotion) {
+          particle.x += particle.speedX;
+          particle.y += particle.speedY;
+          particle.pulse += particle.pulseSpeed;
+
+          if (particle.x < -10) particle.x = width + 10;
+          if (particle.x > width + 10) particle.x = -10;
+
+          if (particle.y < -10) particle.y = height + 10;
+          if (particle.y > height + 10) particle.y = -10;
+        }
+
+        const opacity =
+          particle.opacity *
+          (0.65 + Math.sin(particle.pulse) * 0.35);
+
+        ctx.beginPath();
+        ctx.arc(
+          particle.x,
+          particle.y,
+          particle.radius,
+          0,
+          Math.PI * 2
+        );
+
+        ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+        ctx.fill();
+      }
+
+      if (!prefersReducedMotion) {
+        requestAnimationFrame(drawParticles);
+      }
+    }
+
+    window.addEventListener("resize", resizeCanvas, {
+      passive: true
+    });
+
+    resizeCanvas();
+    drawParticles();
+
+
+    /* =========================================================
+       SUBTLE MOUSE / TOUCH PARALLAX
+    ========================================================= */
+
+    const content = document.querySelector(".content");
+
+    if (!prefersReducedMotion) {
+      let targetX = 0;
+      let targetY = 0;
+      let currentX = 0;
+      let currentY = 0;
+
+      function updateParallax() {
+        currentX += (targetX - currentX) * 0.035;
+        currentY += (targetY - currentY) * 0.035;
+
+        content.style.transform =
+          `translate3d(${currentX}px, ${currentY}px, 0)`;
+
+        requestAnimationFrame(updateParallax);
+      }
+
+      window.addEventListener("pointermove", (event) => {
+        const x =
+          event.clientX / window.innerWidth - 0.5;
+
+        const y =
+          event.clientY / window.innerHeight - 0.5;
+
+        targetX = x * 10;
+        targetY = y * 7;
+      }, { passive: true });
+
+      updateParallax();
+    }
+  </script>
+
+</body>
+</html>
