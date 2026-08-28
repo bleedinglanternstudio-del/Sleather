@@ -1,528 +1,1342 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="index,follow">
+<meta name="description" content="Coming soon.">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  >
+<meta property="og:title" content="Coming Soon">
+<meta property="og:description" content="Something is coming.">
+<meta property="og:type" content="website">
 
-  <meta name="theme-color" content="#030303">
-  <meta name="color-scheme" content="dark">
+<title>Coming Soon</title>
 
-  <meta name="robots" content="index, follow">
-  <meta name="googlebot" content="index, follow">
+<style>
+:root{
+  --x:50vw;
+  --y:50vh;
+  --intro:1;
+}
 
-  <meta
-    name="description"
-    content="Something is coming."
-  >
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Coming Soon">
-  <meta property="og:description" content="Something is coming.">
-  <meta property="og:image" content="">
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+}
 
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Coming Soon">
-  <meta name="twitter:description" content="Something is coming.">
+body{
+  color:#fff;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  user-select:none;
+}
 
-  <title>Coming Soon</title>
+canvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+}
 
-  <style>
+#gl{
+  z-index:0;
+}
 
-    /* =========================================================
-       CORE
-    ========================================================= */
+#fx{
+  z-index:1;
+  pointer-events:none;
+}
 
-    :root {
-      --bg: #030303;
-      --fg: #ffffff;
+.screen{
+  position:fixed;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+}
 
-      --muted: rgba(255,255,255,.42);
-      --faint: rgba(255,255,255,.12);
-      --hairline: rgba(255,255,255,.08);
+.vignette{
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 22%,
+      rgba(0,0,0,.15) 52%,
+      rgba(0,0,0,.82) 100%
+    );
+}
 
-      --mx: 50%;
-      --my: 50%;
+.scanlines{
+  opacity:.10;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.035) 0,
+      rgba(255,255,255,.035) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  mix-blend-mode:overlay;
+}
 
-      --ease: cubic-bezier(.16,1,.3,1);
+.noise{
+  opacity:.045;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+  animation:noise .18s steps(2) infinite;
+}
+
+@keyframes noise{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(1%,-1%)}
+  50%{transform:translate(-1%,1%)}
+  75%{transform:translate(1%,1%)}
+  100%{transform:translate(-1%,-1%)}
+}
+
+/* ---------------------------
+   INTRO
+--------------------------- */
+
+#intro{
+  position:fixed;
+  inset:0;
+  z-index:20;
+  background:#000;
+  display:grid;
+  place-items:center;
+  transition:
+    opacity 1.3s cubic-bezier(.16,1,.3,1),
+    visibility 1.3s;
+}
+
+#intro.hide{
+  opacity:0;
+  visibility:hidden;
+}
+
+.boot{
+  width:min(280px,65vw);
+  color:rgba(255,255,255,.35);
+  font-size:9px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  text-align:center;
+}
+
+.boot-label{
+  margin-bottom:14px;
+}
+
+.boot-line{
+  height:1px;
+  width:100%;
+  background:rgba(255,255,255,.09);
+  overflow:hidden;
+}
+
+.boot-line i{
+  display:block;
+  width:0;
+  height:100%;
+  background:#fff;
+  box-shadow:0 0 18px #fff;
+  animation:boot 1.8s cubic-bezier(.16,1,.3,1) forwards;
+}
+
+@keyframes boot{
+  to{width:100%}
+}
+
+/* ---------------------------
+   MAIN
+--------------------------- */
+
+main{
+  position:fixed;
+  inset:0;
+  z-index:10;
+  display:grid;
+  place-items:center;
+  padding:
+    max(24px,env(safe-area-inset-top))
+    max(24px,env(safe-area-inset-right))
+    max(24px,env(safe-area-inset-bottom))
+    max(24px,env(safe-area-inset-left));
+}
+
+.content{
+  position:relative;
+  text-align:center;
+  width:min(1100px,100%);
+  transform-style:preserve-3d;
+  will-change:transform;
+  opacity:0;
+  animation:contentIn 1.8s cubic-bezier(.16,1,.3,1) 1.8s forwards;
+}
+
+@keyframes contentIn{
+  0%{
+    opacity:0;
+    transform:
+      translate3d(0,30px,0)
+      scale(.94);
+    filter:blur(18px);
+  }
+  60%{
+    opacity:1;
+    filter:blur(0);
+  }
+  100%{
+    opacity:1;
+    transform:translate3d(0,0,0) scale(1);
+    filter:blur(0);
+  }
+}
+
+/* ---------------------------
+   EYEBROW
+--------------------------- */
+
+.eyebrow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+
+  color:rgba(255,255,255,.45);
+
+  font-size:clamp(8px,1vw,12px);
+  font-weight:700;
+  letter-spacing:.36em;
+  text-transform:uppercase;
+
+  margin-bottom:clamp(20px,3.5vw,38px);
+}
+
+.eyebrow b{
+  width:clamp(22px,4vw,55px);
+  height:1px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.45)
+    );
+}
+
+.eyebrow b:last-child{
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,.45),
+      transparent
+    );
+}
+
+/* ---------------------------
+   TITLE
+--------------------------- */
+
+h1{
+  margin:0;
+  font-size:clamp(3.4rem,12vw,11rem);
+  line-height:.79;
+  letter-spacing:-.085em;
+  font-weight:900;
+}
+
+.word{
+  position:relative;
+  display:block;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fff 0%,
+      #f4f4f4 30%,
+      #b9b9b9 67%,
+      #4a4a4a 100%
+    );
+
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+
+  text-shadow:
+    0 0 30px rgba(255,255,255,.035),
+    0 0 100px rgba(255,255,255,.025);
+}
+
+.word:first-child{
+  animation:titleFloat 7s ease-in-out 3.2s infinite;
+}
+
+.word:last-child{
+  animation:titleFloat 7s ease-in-out 3.6s infinite reverse;
+}
+
+@keyframes titleFloat{
+  0%,100%{
+    transform:translate3d(0,0,0);
+  }
+  50%{
+    transform:translate3d(0,-3px,0);
+  }
+}
+
+/* ---------------------------
+   ACCENT
+--------------------------- */
+
+.accent{
+  position:relative;
+  width:clamp(75px,13vw,155px);
+  height:1px;
+  margin:clamp(26px,4vw,44px) auto 0;
+  background:rgba(255,255,255,.15);
+  overflow:hidden;
+}
+
+.accent::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  left:-100%;
+  background:#fff;
+  box-shadow:
+    0 0 10px #fff,
+    0 0 35px rgba(255,255,255,.5);
+  animation:sweep 3.5s ease-in-out 2.8s infinite;
+}
+
+@keyframes sweep{
+  0%{left:-100%}
+  45%,100%{left:100%}
+}
+
+/* ---------------------------
+   SUBTITLE
+--------------------------- */
+
+.subtitle{
+  margin-top:clamp(24px,4vw,40px);
+  color:rgba(255,255,255,.35);
+  font-size:clamp(9px,1.1vw,13px);
+  font-weight:600;
+  letter-spacing:.27em;
+  text-transform:uppercase;
+}
+
+/* ---------------------------
+   STATUS
+--------------------------- */
+
+.status{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+
+  margin-top:clamp(24px,4vw,40px);
+
+  color:rgba(255,255,255,.22);
+
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+}
+
+.dot{
+  position:relative;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 10px #fff;
+}
+
+.dot::after{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:50%;
+  animation:ping 2s ease-out infinite;
+}
+
+@keyframes ping{
+  from{
+    opacity:.8;
+    transform:scale(.4);
+  }
+  to{
+    opacity:0;
+    transform:scale(2.5);
+  }
+}
+
+/* ---------------------------
+   CORNERS
+--------------------------- */
+
+.corner{
+  position:fixed;
+  z-index:15;
+
+  width:32px;
+  height:32px;
+
+  opacity:.23;
+}
+
+.corner::before,
+.corner::after{
+  content:"";
+  position:absolute;
+  background:#fff;
+}
+
+.corner::before{
+  width:100%;
+  height:1px;
+}
+
+.corner::after{
+  width:1px;
+  height:100%;
+}
+
+.tl{top:30px;left:30px}
+.tr{top:30px;right:30px;transform:rotate(90deg)}
+.br{right:30px;bottom:30px;transform:rotate(180deg)}
+.bl{bottom:30px;left:30px;transform:rotate(270deg)}
+
+footer{
+  position:fixed;
+  z-index:15;
+
+  left:50%;
+  bottom:max(22px,env(safe-area-inset-bottom));
+
+  transform:translateX(-50%);
+
+  color:rgba(255,255,255,.13);
+
+  font-size:7px;
+  font-weight:700;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+
+  white-space:nowrap;
+}
+
+/* ---------------------------
+   MOBILE
+--------------------------- */
+
+@media(max-width:600px){
+
+  h1{
+    font-size:clamp(3.3rem,17vw,6.5rem);
+    letter-spacing:-.075em;
+  }
+
+  .eyebrow{
+    letter-spacing:.21em;
+  }
+
+  .subtitle{
+    letter-spacing:.14em;
+  }
+
+  .status{
+    letter-spacing:.13em;
+  }
+
+  .corner{
+    width:20px;
+    height:20px;
+  }
+
+  .tl,.tr{top:18px}
+  .tl,.bl{left:18px}
+  .tr,.br{right:18px}
+  .bl,.br{bottom:18px}
+
+  footer{
+    font-size:6px;
+    letter-spacing:.17em;
+  }
+}
+
+@media(max-height:520px){
+
+  .eyebrow{
+    margin-bottom:15px;
+  }
+
+  h1{
+    font-size:clamp(2.8rem,14vw,6rem);
+  }
+
+  .accent{
+    margin-top:20px;
+  }
+
+  .subtitle{
+    margin-top:19px;
+  }
+
+  .status{
+    margin-top:18px;
+  }
+
+  footer{
+    display:none;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+
+  *,
+  *::before,
+  *::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- GPU WORLD -->
+<canvas id="gl"></canvas>
+
+<!-- PARTICLE / FX LAYER -->
+<canvas id="fx"></canvas>
+
+<!-- ATMOSPHERE -->
+<div class="screen scanlines"></div>
+<div class="screen noise"></div>
+<div class="screen vignette"></div>
+
+<!-- BOOT -->
+<div id="intro">
+  <div class="boot">
+    <div class="boot-label">Initializing</div>
+    <div class="boot-line">
+      <i></i>
+    </div>
+  </div>
+</div>
+
+<!-- CORNERS -->
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner br"></div>
+<div class="corner bl"></div>
+
+<!-- CONTENT -->
+<main>
+  <section class="content">
+
+    <div class="eyebrow">
+      <b></b>
+      Something is coming
+      <b></b>
+    </div>
+
+    <h1>
+      <span class="word">COMING</span>
+      <span class="word">SOON</span>
+    </h1>
+
+    <div class="accent"></div>
+
+    <div class="subtitle">
+      Stay tuned
+    </div>
+
+    <div class="status">
+      <span class="dot"></span>
+      Preparing
+    </div>
+
+  </section>
+</main>
+
+<footer>
+  Something worth waiting for
+</footer>
+
+<script>
+"use strict";
+
+/* ============================================================
+   ENVIRONMENT
+============================================================ */
+
+const glCanvas = document.getElementById("gl");
+const fxCanvas = document.getElementById("fx");
+
+const gl =
+  glCanvas.getContext("webgl",
+    {
+      alpha:true,
+      antialias:false,
+      powerPreference:"high-performance"
     }
+  );
 
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
+const fx =
+  fxCanvas.getContext("2d",{
+    alpha:true,
+    desynchronized:true
+  });
 
-    html {
-      width: 100%;
-      height: 100%;
-      background: var(--bg);
-      color-scheme: dark;
-      -webkit-text-size-adjust: 100%;
-    }
+const reduced =
+  matchMedia("(prefers-reduced-motion:reduce)").matches;
 
-    body {
-      width: 100%;
-      min-height: 100%;
-      margin: 0;
+const coarse =
+  matchMedia("(pointer:coarse)").matches;
 
-      overflow: hidden;
+const cores =
+  navigator.hardwareConcurrency || 4;
 
-      background:
-        radial-gradient(
-          circle at var(--mx) var(--my),
-          rgba(255,255,255,.055) 0%,
-          rgba(255,255,255,.018) 17%,
-          transparent 48%
-        ),
-        var(--bg);
+const memory =
+  navigator.deviceMemory || 4;
 
-      color: var(--fg);
+let quality =
+  cores <= 4 || memory <= 4 ? .55 :
+  cores <= 6 || memory <= 8 ? .75 :
+  1;
 
-      font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
 
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+/* ============================================================
+   POINTER
+============================================================ */
 
-      cursor: default;
-    }
+let mouseX=.5;
+let mouseY=.5;
 
-    /* =========================================================
-       CANVAS
-    ========================================================= */
+let targetX=.5;
+let targetY=.5;
 
-    #space {
-      position: fixed;
-      inset: 0;
+window.addEventListener("pointermove",e=>{
 
-      width: 100%;
-      height: 100%;
+  targetX=e.clientX/innerWidth;
+  targetY=e.clientY/innerHeight;
 
-      z-index: 0;
+},{
+  passive:true
+});
 
-      pointer-events: none;
-    }
+if(coarse){
 
-    /* =========================================================
-       ATMOSPHERE
-    ========================================================= */
+  window.addEventListener("touchmove",e=>{
 
-    .atmosphere {
-      position: fixed;
-      inset: 0;
+    if(!e.touches[0]) return;
 
-      z-index: 1;
+    targetX=e.touches[0].clientX/innerWidth;
+    targetY=e.touches[0].clientY/innerHeight;
 
-      pointer-events: none;
+  },{
+    passive:true
+  });
 
-      overflow: hidden;
-    }
+}
 
-    .atmosphere::before {
-      content: "";
 
-      position: absolute;
-      inset: -20%;
+/* ============================================================
+   WEBGL SHADERS
+============================================================ */
 
-      background:
-        radial-gradient(
-          circle at var(--mx) var(--my),
-          rgba(255,255,255,.045),
-          transparent 26%
-        );
+const vertexSource=`
 
-      filter: blur(35px);
+attribute vec3 position;
+attribute float size;
+attribute float alpha;
 
-      transition:
-        background-position .2s linear;
-    }
+uniform float uTime;
+uniform vec2 uMouse;
+uniform float uAspect;
 
-    .atmosphere::after {
-      content: "";
+varying float vAlpha;
 
-      position: absolute;
-      inset: 0;
+void main(){
 
-      background:
-        linear-gradient(
-          rgba(255,255,255,.012) 50%,
-          transparent 50%
-        );
+  vec3 p=position;
 
-      background-size: 100% 4px;
+  float t=uTime*.08;
 
-      opacity: .18;
+  float wave=
+    sin(p.x*2.4+t)+
+    cos(p.y*2.1-t)+
+    sin(p.z*2.8+t*.7);
 
-      mix-blend-mode: overlay;
-    }
+  p.z += wave*.08;
 
-    /* =========================================================
-       NOISE
-    ========================================================= */
+  vec2 m=uMouse*2.0-1.0;
 
-    .noise {
-      position: fixed;
-      inset: -50%;
+  float dx=p.x-m.x;
+  float dy=p.y-m.y;
 
-      width: 200%;
-      height: 200%;
+  float d=dx*dx+dy*dy;
 
-      z-index: 6;
+  float influence=
+    exp(-d*2.2);
 
-      pointer-events: none;
+  p.x += dx*influence*.08;
+  p.y += dy*influence*.08;
 
-      opacity: .035;
+  gl_Position=
+    vec4(p,1.0);
 
-      background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  gl_PointSize=
+    size*(1.0+influence*1.8);
 
-      animation:
-        noise .22s steps(2) infinite;
-    }
+  vAlpha=
+    alpha*(.7+influence*.8);
+}
+`;
 
-    @keyframes noise {
-      0% { transform: translate(0,0); }
-      25% { transform: translate(1%,-1%); }
-      50% { transform: translate(-1%,1%); }
-      75% { transform: translate(1%,1%); }
-      100% { transform: translate(-1%,-1%); }
-    }
+const fragmentSource=`
 
-    /* =========================================================
-       VIGNETTE
-    ========================================================= */
+precision mediump float;
 
-    .vignette {
-      position: fixed;
-      inset: 0;
+uniform float uTime;
 
-      z-index: 5;
+varying float vAlpha;
 
-      pointer-events: none;
+void main(){
 
-      background:
-        radial-gradient(
-          ellipse at center,
-          transparent 22%,
-          rgba(0,0,0,.18) 55%,
-          rgba(0,0,0,.82) 100%
-        );
-    }
+  vec2 uv=
+    gl_PointCoord-.5;
 
-    /* =========================================================
-       LIGHT
-    ========================================================= */
+  float d=
+    length(uv);
 
-    .light {
-      position: fixed;
+  float soft=
+    smoothstep(.5,0.0,d);
 
-      left: var(--mx);
-      top: var(--my);
+  float core=
+    smoothstep(.18,0.0,d);
 
-      width: min(45vw, 650px);
-      aspect-ratio: 1;
+  float pulse=
+    .75+
+    sin(uTime*.7)*.25;
 
-      transform:
-        translate(-50%,-50%);
+  float a=
+    soft*vAlpha*pulse;
 
-      border-radius: 50%;
+  vec3 c=
+    mix(
+      vec3(.25,.25,.25),
+      vec3(1.0),
+      core
+    );
 
-      background:
-        radial-gradient(
-          circle,
-          rgba(255,255,255,.055),
-          transparent 65%
-        );
+  gl_FragColor=
+    vec4(c,a);
+}
+`;
 
-      filter: blur(30px);
 
-      z-index: 1;
+/* ============================================================
+   SHADER HELPERS
+============================================================ */
 
-      pointer-events: none;
+function compile(type,source){
 
-      transition:
-        left .35s var(--ease),
-        top .35s var(--ease);
-    }
+  const shader=
+    gl.createShader(type);
 
-    /* =========================================================
-       MAIN
-    ========================================================= */
+  gl.shaderSource(shader,source);
+  gl.compileShader(shader);
 
-    main {
-      position: relative;
+  if(!gl.getShaderParameter(
+    shader,
+    gl.COMPILE_STATUS
+  )){
+    console.warn(
+      gl.getShaderInfoLog(shader)
+    );
+  }
 
-      z-index: 10;
+  return shader;
+}
 
-      width: 100%;
-      min-height: 100svh;
+function program(){
 
-      display: grid;
-      place-items: center;
+  const p=
+    gl.createProgram();
 
-      padding:
-        max(24px, env(safe-area-inset-top))
-        max(24px, env(safe-area-inset-right))
-        max(24px, env(safe-area-inset-bottom))
-        max(24px, env(safe-area-inset-left));
-    }
+  gl.attachShader(
+    p,
+    compile(
+      gl.VERTEX_SHADER,
+      vertexSource
+    )
+  );
 
-    .content {
-      position: relative;
+  gl.attachShader(
+    p,
+    compile(
+      gl.FRAGMENT_SHADER,
+      fragmentSource
+    )
+  );
 
-      width: min(1100px, 100%);
+  gl.linkProgram(p);
 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+  return p;
+}
 
-      text-align: center;
 
-      transform:
-        translate3d(0,0,0);
+/* ============================================================
+   WEBGL SETUP
+============================================================ */
 
-      will-change: transform;
+let webglReady=false;
 
-      opacity: 0;
+let shaderProgram;
+let buffer;
+let sizeBuffer;
+let alphaBuffer;
 
-      animation:
-        reveal 1.5s var(--ease) .35s forwards;
-    }
+let uTime;
+let uMouse;
+let uAspect;
 
-    @keyframes reveal {
-      from {
-        opacity: 0;
-        transform:
-          translate3d(0,30px,0)
-          scale(.975);
+if(gl){
 
-        filter: blur(12px);
+  shaderProgram=
+    program();
+
+  gl.useProgram(
+    shaderProgram
+  );
+
+  buffer=
+    gl.createBuffer();
+
+  sizeBuffer=
+    gl.createBuffer();
+
+  alphaBuffer=
+    gl.createBuffer();
+
+  uTime=
+    gl.getUniformLocation(
+      shaderProgram,
+      "uTime"
+    );
+
+  uMouse=
+    gl.getUniformLocation(
+      shaderProgram,
+      "uMouse"
+    );
+
+  uAspect=
+    gl.getUniformLocation(
+      shaderProgram,
+      "uAspect"
+    );
+
+  webglReady=true;
+}
+
+
+/* ============================================================
+   PARTICLES
+============================================================ */
+
+let positions=[];
+let sizes=[];
+let alphas=[];
+
+function buildParticles(){
+
+  positions=[];
+  sizes=[];
+  alphas=[];
+
+  const count=
+    Math.floor(
+      900*quality
+    );
+
+  for(let i=0;i<count;i++){
+
+    const radius=
+      Math.pow(
+        Math.random(),
+        .72
+      )*1.15;
+
+    const angle=
+      Math.random()*
+      Math.PI*2;
+
+    const x=
+      Math.cos(angle)*
+      radius;
+
+    const y=
+      Math.sin(angle)*
+      radius;
+
+    const z=
+      (Math.random()-.5)*1.4;
+
+    positions.push(
+      x,
+      y,
+      z
+    );
+
+    sizes.push(
+      (Math.random()*.8+.35)*
+      (coarse?1.2:1)
+    );
+
+    alphas.push(
+      Math.random()*.38+.04
+    );
+  }
+
+  if(!webglReady)return;
+
+  gl.bindBuffer(
+    gl.ARRAY_BUFFER,
+    buffer
+  );
+
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(positions),
+    gl.STATIC_DRAW
+  );
+
+  gl.bindBuffer(
+    gl.ARRAY_BUFFER,
+    sizeBuffer
+  );
+
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(sizes),
+    gl.STATIC_DRAW
+  );
+
+  gl.bindBuffer(
+    gl.ARRAY_BUFFER,
+    alphaBuffer
+  );
+
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(alphas),
+    gl.STATIC_DRAW
+  );
+}
+
+
+/* ============================================================
+   RESIZE
+============================================================ */
+
+function resize(){
+
+  const dpr=
+    Math.min(
+      devicePixelRatio||1,
+      coarse?1.5:2
+    );
+
+  glCanvas.width=
+    innerWidth*dpr;
+
+  glCanvas.height=
+    innerHeight*dpr;
+
+  fxCanvas.width=
+    innerWidth*dpr;
+
+  fxCanvas.height=
+    innerHeight*dpr;
+
+  glCanvas.style.width=
+    innerWidth+"px";
+
+  glCanvas.style.height=
+    innerHeight+"px";
+
+  fxCanvas.style.width=
+    innerWidth+"px";
+
+  fxCanvas.style.height=
+    innerHeight+"px";
+
+  if(gl){
+
+    gl.viewport(
+      0,
+      0,
+      glCanvas.width,
+      glCanvas.height
+    );
+  }
+
+  fx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
+
+  buildParticles();
+}
+
+addEventListener(
+  "resize",
+  resize,
+  {passive:true}
+);
+
+resize();
+
+
+/* ============================================================
+   WEBGL RENDER
+============================================================ */
+
+let start=
+  performance.now();
+
+function renderGL(now){
+
+  if(!webglReady)return;
+
+  const time=
+    (now-start)/1000;
+
+  mouseX +=
+    (targetX-mouseX)*.035;
+
+  mouseY +=
+    (targetY-mouseY)*.035;
+
+  gl.clearColor(
+    0,
+    0,
+    0,
+    0
+  );
+
+  gl.clear(
+    gl.COLOR_BUFFER_BIT
+  );
+
+  gl.enable(
+    gl.BLEND
+  );
+
+  gl.blendFunc(
+    gl.SRC_ALPHA,
+    gl.ONE
+  );
+
+  gl.useProgram(
+    shaderProgram
+  );
+
+  gl.uniform1f(
+    uTime,
+    time
+  );
+
+  gl.uniform2f(
+    uMouse,
+    mouseX,
+    1-mouseY
+  );
+
+  gl.uniform1f(
+    uAspect,
+    innerWidth/innerHeight
+  );
+
+  /* positions */
+
+  const posLocation=
+    gl.getAttribLocation(
+      shaderProgram,
+      "position"
+    );
+
+  gl.bindBuffer(
+    gl.ARRAY_BUFFER,
+    buffer
+  );
+
+  gl.enableVertexAttribArray(
+    posLocation
+  );
+
+  gl.vertexAttribPointer(
+    posLocation,
+    3,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+
+  /* sizes */
+
+  const sizeLocation=
+    gl.getAttribLocation(
+      shaderProgram,
+      "size"
+    );
+
+  gl.bindBuffer(
+    gl.ARRAY_BUFFER,
+    sizeBuffer
+  );
+
+  gl.enableVertexAttribArray(
+    sizeLocation
+  );
+
+  gl.vertexAttribPointer(
+    sizeLocation,
+    1,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+
+  /* alpha */
+
+  const alphaLocation=
+    gl.getAttribLocation(
+      shaderProgram,
+      "alpha"
+    );
+
+  gl.bindBuffer(
+    gl.ARRAY_BUFFER,
+    alphaBuffer
+  );
+
+  gl.enableVertexAttribArray(
+    alphaLocation
+  );
+
+  gl.vertexAttribPointer(
+    alphaLocation,
+    1,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+
+  gl.drawArrays(
+    gl.POINTS,
+    0,
+    positions.length/3
+  );
+}
+
+
+/* ============================================================
+   SECONDARY PARTICLE FIELD
+============================================================ */
+
+let sparks=[];
+
+function buildSparks(){
+
+  sparks=[];
+
+  const count=
+    Math.floor(
+      150*quality
+    );
+
+  for(let i=0;i<count;i++){
+
+    sparks.push({
+
+      x:Math.random()*innerWidth,
+
+      y:Math.random()*innerHeight,
+
+      r:Math.random()*.8+.1,
+
+      vx:(Math.random()-.5)*.12,
+
+      vy:(Math.random()-.5)*.12,
+
+      a:Math.random()*.3+.02,
+
+      p:Math.random()*Math.PI*2,
+
+      s:Math.random()*.02+.003
+
+    });
+  }
+}
+
+buildSparks();
+
+
+/* ============================================================
+   2D FX
+============================================================ */
+
+function renderFX(){
+
+  fx.clearRect(
+    0,
+    0,
+    innerWidth,
+    innerHeight
+  );
+
+  for(const p of sparks){
+
+    if(!reduced){
+
+      p.x+=p.vx;
+      p.y+=p.vy;
+
+      p.p+=p.s;
+
+      const dx=
+        mouseX*innerWidth-p.x;
+
+      const dy=
+        mouseY*innerHeight-p.y;
+
+      const d=
+        Math.sqrt(dx*dx+dy*dy);
+
+      if(d<180){
+
+        const force=
+          (1-d/180)*.018;
+
+        p.x+=dx*force;
+        p.y+=dy*force;
       }
 
-      to {
-        opacity: 1;
-        transform:
-          translate3d(0,0,0)
-          scale(1);
+      if(p.x<-10)p.x=innerWidth+10;
+      if(p.x>innerWidth+10)p.x=-10;
 
-        filter: blur(0);
-      }
+      if(p.y<-10)p.y=innerHeight+10;
+      if(p.y>innerHeight+10)p.y=-10;
     }
 
-    /* =========================================================
-       EYEBROW
-    ========================================================= */
+    const alpha=
+      p.a*
+      (.6+
+      Math.sin(p.p)*.4);
 
-    .eyebrow {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    fx.beginPath();
 
-      margin-bottom:
-        clamp(20px, 3vw, 34px);
+    fx.arc(
+      p.x,
+      p.y,
+      p.r,
+      0,
+      Math.PI*2
+    );
 
-      color: var(--muted);
+    fx.fillStyle=
+      `rgba(255,255,255,${alpha})`;
 
-      font-size:
-        clamp(9px, 1vw, 12px);
+    fx.fill();
+  }
+}
 
-      font-weight: 700;
 
-      letter-spacing:
-        .34em;
+/* ============================================================
+   POINTER LIGHT
+============================================================ */
 
-      text-transform:
-        uppercase;
-    }
+function updateCSS(){
 
-    .eyebrow span {
-      width:
-        clamp(20px, 4vw, 50px);
+  document.documentElement
+    .style
+    .setProperty(
+      "--x",
+      `${mouseX*100}vw`
+    );
 
-      height: 1px;
+  document.documentElement
+    .style
+    .setProperty(
+      "--y",
+      `${mouseY*100}vh`
+    );
+}
 
-      background:
-        linear-gradient(
-          90deg,
-          transparent,
-          rgba(255,255,255,.42)
-        );
-    }
 
-    .eyebrow span:last-child {
-      background:
-        linear-gradient(
-          90deg,
-          rgba(255,255,255,.42),
-          transparent
-        );
-    }
+/* ============================================================
+   CONTENT PARALLAX
+============================================================ */
 
-    /* =========================================================
-       TITLE
-    ========================================================= */
+const content=
+  document.querySelector(
+    ".content"
+  );
 
-    .title {
-      margin: 0;
+function parallax(){
 
-      font-size:
-        clamp(3.5rem, 12vw, 11rem);
+  if(!reduced){
 
-      line-height:
-        .82;
+    const x=
+      (mouseX-.5)*7;
 
-      font-weight:
-        850;
+    const y=
+      (mouseY-.5)*5;
 
-      letter-spacing:
-        -.085em;
+    content.style.transform=
+      `translate3d(${x}px,${y}px,0)`;
+  }
+}
 
-      user-select:
-        none;
 
-      perspective:
-        1000px;
-    }
-
-    .title-line {
-      display: block;
-
-      position: relative;
-
-      background:
-        linear-gradient(
-          180deg,
-          #fff 0%,
-          #f5f5f5 32%,
-          #aaa 72%,
-          #555 100%
-        );
-
-      -webkit-background-clip:
-        text;
-
-      background-clip:
-        text;
-
-      color:
-        transparent;
-
-      transform:
-        translateZ(0);
-
-      text-shadow:
-        0 0 30px rgba(255,255,255,.04),
-        0 0 100px rgba(255,255,255,.025);
-    }
-
-    .title-line::selection {
-      color: #fff;
-      background: rgba(255,255,255,.15);
-    }
-
-    /* =========================================================
-       UNDERLINE
-    ========================================================= */
-
-    .accent-line {
-      position: relative;
-
-      width:
-        clamp(80px, 14vw, 150px);
-
-      height: 1px;
-
-      margin-top:
-        clamp(24px, 4vw, 42px);
-
-      background:
-        rgba(255,255,255,.22);
-
-      overflow: hidden;
-    }
-
-    .accent-line::after {
-      content: "";
-
-      position: absolute;
-
-      top: 0;
-      left: -100%;
-
-      width: 100%;
-      height: 100%;
-
-      background: #fff;
-
-      box-shadow:
-        0 0 14px rgba(255,255,255,.8),
-        0 0 40px rgba(255,255,255,.25);
-
-      animation:
-        sweep 3.2s ease-in-out infinite;
-    }
-
-    @keyframes sweep {
-      0% {
-        left: -100%;
-      }
-
-      45%,
-      100% {
-        left: 100%;
-      }
-    }
-
-    /* =========================================================
-       SUBTITLE
-    ========================================================= */
-
-    .subtitle {
-      margin-top:
-        clamp(25px, 4vw, 38px);
-
-      color:
-        rgba(255,255,255,.38);
-
-      font-size:
-        clamp(10px, 1.2vw, 14px);
-
-      font-weight:
-        600;
-
-      letter-spacing:
-        .25em;
-
-      text-transform:
-        uppercase;
-    }
-
-    /* =========================================================
-       STATUS
-    ========================================================= */
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      margin-top:
-        clamp(26px, 4vw, 40px);
-
-      color:
-        rgba(255,255,255,.25);
-
-      font-size:
+/* ============================================================
+   MAIN LOt-size:
         9px;
 
       font-weight:
